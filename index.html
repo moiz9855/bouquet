@@ -1,0 +1,2805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build Your Own Bouquet — For Manahil Jiii</title>
+  <meta name="description" content="A tender, interactive floral bouquet crafted especially for Manahil jiii.">
+
+  <!-- Handcrafted Rose Bud Favicon -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23FBF4EC'/%3E%3Ccircle cx='16' cy='16' r='14' fill='%236B2B3A'/%3E%3Cpath d='M16 8 C11 8 9 12 11 17 C13 21 19 21 21 17 C23 12 21 8 16 8 Z' fill='%23C97B84'/%3E%3Ccircle cx='16' cy='15' r='3.2' fill='%23C7A05A'/%3E%3C/svg%3E">
+
+  <!-- Google Fonts: Cormorant Garamond, Karla, & Great Vibes for signature -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Great+Vibes&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM & DYNAMIC THEMES
+       ========================================================================== */
+    :root {
+      --cream: #FBF4EC;
+      --burgundy: #6B2B3A;
+      --burgundy-deep: #4A1D28;
+      --rose: #C97B84;
+      --rose-light: #F9E8EB;
+      --sage: #7C8A6E;
+      --gold: #C7A05A;
+      --gold-light: #F5E6CA;
+      --ink: #2E2019;
+      --paper: #FFFCF7;
+      --paper-border: rgba(201, 123, 132, 0.3);
+      --overlay-bg: rgba(46, 32, 25, 0.55);
+
+      --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      --font-sans: 'Karla', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-script: 'Great Vibes', cursive;
+
+      --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+      --card-shadow: 0 20px 48px -12px rgba(46, 32, 25, 0.18), 0 4px 16px -2px rgba(46, 32, 25, 0.08);
+      --focus-ring: 0 0 0 2px var(--cream), 0 0 0 4px var(--burgundy);
+    }
+
+    /* Candlelit Night Mode */
+    [data-theme="candlelight"] {
+      --cream: #181216;
+      --burgundy: #F29BB0;
+      --burgundy-deep: #FFE0E6;
+      --rose: #E68B99;
+      --rose-light: #321A22;
+      --sage: #A1B291;
+      --gold: #F2C779;
+      --gold-light: #3A2E1C;
+      --ink: #F7EDE2;
+      --paper: #23181F;
+      --paper-border: rgba(242, 199, 121, 0.28);
+      --overlay-bg: rgba(10, 6, 8, 0.75);
+      --card-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.65), 0 0 30px rgba(242, 199, 121, 0.08);
+    }
+
+    /* Styled selection */
+    ::selection {
+      background-color: var(--rose);
+      color: var(--paper);
+    }
+
+    /* Reset & Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: var(--cream);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      transition: background-color 500ms ease, color 500ms ease;
+    }
+
+    body {
+      background-color: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 1.25rem 5rem 1.25rem;
+      overflow-x: hidden;
+      line-height: 1.5;
+      position: relative;
+      transition: background-color 500ms ease, color 500ms ease;
+    }
+
+    /* Full-screen falling petals & stardust canvas */
+    #ambientCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    :focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+      border-radius: 4px;
+    }
+
+    /* ==========================================================================
+       TOP FLOATING AMBIENCE BAR (Music + Theme Toggle)
+       ========================================================================== */
+    .ambience-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 0.25rem 0.5rem 0.25rem;
+      gap: 0.75rem;
+      animation: gentleEntrance 600ms ease-out forwards;
+    }
+
+    .ambience-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: var(--paper);
+      border: 1px solid var(--paper-border);
+      border-radius: 20px;
+      padding: 0.4rem 0.85rem;
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--burgundy);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease;
+      user-select: none;
+    }
+
+    .ambience-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--gold);
+    }
+
+    .ambience-btn:active {
+      transform: translateY(0);
+    }
+
+    .ambience-btn.active {
+      background: var(--burgundy);
+      color: var(--paper);
+      border-color: var(--burgundy-deep);
+    }
+
+    /* Audio Equalizer Wave Animation */
+    .sound-waves {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 12px;
+    }
+
+    .sound-bar {
+      width: 2.5px;
+      height: 4px;
+      background: currentColor;
+      border-radius: 1px;
+      transition: height 150ms ease;
+    }
+
+    .ambience-btn.playing .sound-bar:nth-child(1) { animation: soundWave 0.8s ease-in-out infinite alternate; }
+    .ambience-btn.playing .sound-bar:nth-child(2) { animation: soundWave 0.9s ease-in-out infinite 0.2s alternate; }
+    .ambience-btn.playing .sound-bar:nth-child(3) { animation: soundWave 0.7s ease-in-out infinite 0.4s alternate; }
+
+    @keyframes soundWave {
+      0% { height: 3px; }
+      100% { height: 12px; }
+    }
+
+    /* ==========================================================================
+       HEADER (Orchestrated entrance on load)
+       ========================================================================== */
+    .header-section {
+      text-align: center;
+      padding-top: 1.5rem;
+      padding-bottom: 0.5rem;
+      animation: gentleEntrance 700ms ease-out forwards;
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    @keyframes gentleEntrance {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .eyebrow {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--rose);
+      margin-bottom: 0.65rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .eyebrow-sparkle {
+      color: var(--gold);
+      display: inline-block;
+      animation: sparklePulse 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes sparklePulse {
+      0% { transform: scale(0.85) rotate(0deg); opacity: 0.75; }
+      100% { transform: scale(1.15) rotate(15deg); opacity: 1; }
+    }
+
+    .main-title {
+      font-family: var(--font-serif);
+      font-size: 2.95rem;
+      font-weight: 500;
+      color: var(--burgundy-deep);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+    }
+
+    .header-subtitle {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.12rem;
+      color: var(--rose);
+      margin-top: 0.5rem;
+      max-width: 48ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @media (max-width: 480px) {
+      .header-section {
+        padding-top: 1rem;
+      }
+      .main-title {
+        font-size: 2.2rem;
+      }
+      .header-subtitle {
+        font-size: 1rem;
+      }
+    }
+
+    /* ==========================================================================
+       VASE & BOUQUET SHOWCASE
+       ========================================================================== */
+    .bouquet-showcase {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 0.75rem;
+      animation: gentleEntrance 700ms ease-out 100ms forwards;
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .status-caption {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.25rem;
+      color: var(--burgundy);
+      margin-bottom: 0.35rem;
+      text-align: center;
+      transition: opacity 250ms ease;
+      min-height: 1.85rem;
+      letter-spacing: 0.01em;
+    }
+
+    /* Interactive Pot Action Bar */
+    .pot-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      font-family: var(--font-sans);
+      font-size: 0.825rem;
+      color: var(--ink);
+      opacity: 0.85;
+      margin-bottom: 0.5rem;
+      transition: opacity 300ms ease;
+    }
+
+    .pot-count-tag {
+      font-weight: 600;
+      color: var(--burgundy);
+      background: var(--rose-light);
+      padding: 0.2rem 0.65rem;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      border: 1px solid var(--paper-border);
+    }
+
+    .pot-action-btn {
+      background: none;
+      border: none;
+      color: var(--rose);
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: 0.825rem;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      padding: 0.2rem 0.45rem;
+      border-radius: 3px;
+      transition: color 180ms ease, background-color 180ms ease;
+    }
+
+    .pot-action-btn:hover {
+      color: var(--burgundy);
+      background: var(--rose-light);
+    }
+
+    /* Interactive Whisper Tip above vase */
+    .vase-whisper-tip {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--gold);
+      background: var(--paper);
+      border: 1px solid var(--paper-border);
+      border-radius: 18px;
+      padding: 0.3rem 0.95rem;
+      margin-bottom: 0.65rem;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 300ms ease, transform 300ms ease, background-color 300ms ease;
+      pointer-events: none;
+      text-align: center;
+      max-width: 90%;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    }
+
+    .vase-whisper-tip.is-active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .vase-canvas-wrap {
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      margin: 0 auto;
+    }
+
+    .vase-svg {
+      width: 100%;
+      height: auto;
+      max-height: 450px;
+      overflow: visible;
+      filter: drop-shadow(0 14px 28px rgba(46, 32, 25, 0.12));
+    }
+
+    /* Flower slot entrance: scale 0.6->1, translateY 20px->0, opacity 0->1 */
+    .bouquet-flower-slot {
+      opacity: 0;
+      transform: translateY(20px) scale(0.6);
+      transform-box: fill-box;
+      transform-origin: center bottom;
+      transition: opacity 500ms var(--transition-smooth), transform 500ms var(--transition-smooth);
+      pointer-events: none;
+      cursor: pointer;
+    }
+
+    .bouquet-flower-slot.in-bouquet {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .bouquet-flower-slot.in-bouquet:hover {
+      filter: drop-shadow(0 0 12px var(--gold));
+    }
+
+    /* Living Breeze Sway for Vase Blooms */
+    #bouquet-slot-0.in-bouquet { animation: swaySlot0 5.4s ease-in-out infinite alternate; }
+    #bouquet-slot-1.in-bouquet { animation: swaySlot1 6.2s ease-in-out infinite alternate; }
+    #bouquet-slot-2.in-bouquet { animation: swaySlot2 4.9s ease-in-out infinite alternate; }
+    #bouquet-slot-3.in-bouquet { animation: swaySlot3 5.3s ease-in-out infinite alternate; }
+    #bouquet-slot-4.in-bouquet { animation: swaySlot4 6.5s ease-in-out infinite alternate; }
+    #bouquet-slot-5.in-bouquet { animation: swaySlot5 4.7s ease-in-out infinite alternate; }
+
+    @keyframes swaySlot0 {
+      0% { transform: translateY(0) scale(1) rotate(0deg); }
+      100% { transform: translateY(-3px) scale(1) rotate(-1.6deg); }
+    }
+    @keyframes swaySlot1 {
+      0% { transform: translateY(0) scale(1) rotate(0deg); }
+      100% { transform: translateY(-4px) scale(1) rotate(1.5deg); }
+    }
+    @keyframes swaySlot2 {
+      0% { transform: translateY(0) scale(1) rotate(0deg); }
+      100% { transform: translateY(-3px) scale(1) rotate(-1.2deg); }
+    }
+    @keyframes swaySlot3 {
+      0% { transform: translateY(0) scale(1) rotate(0deg); }
+      100% { transform: translateY(-2px) scale(1) rotate(1.4deg); }
+    }
+    @keyframes swaySlot4 {
+      0% { transform: translateY(0) scale(1) rotate(0deg); }
+      100% { transform: translateY(-4px) scale(1) rotate(-1.6deg); }
+    }
+    @keyframes swaySlot5 {
+      0% { transform: translateY(0) scale(1) rotate(0deg); }
+      100% { transform: translateY(-3px) scale(1) rotate(2deg); }
+    }
+
+    /* Vase ribbon animation */
+    .vase-ribbon {
+      opacity: 0;
+      transform: scale(0.82);
+      transform-box: fill-box;
+      transform-origin: center center;
+      transition: opacity 650ms var(--transition-smooth), transform 650ms var(--transition-smooth);
+    }
+
+    .vase-ribbon.tied {
+      opacity: 1;
+      transform: scale(1);
+      animation: ribbonShimmer 2.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes ribbonShimmer {
+      0%, 100% { filter: drop-shadow(0 0 2px rgba(199, 160, 90, 0.4)); }
+      50% { filter: drop-shadow(0 0 10px rgba(255, 234, 167, 0.9)); }
+    }
+
+    /* ==========================================================================
+       GARDEN GRID
+       ========================================================================== */
+    .garden-section {
+      width: 100%;
+      margin-top: 2.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .garden-header-wrap {
+      text-align: center;
+      margin-bottom: 1.35rem;
+    }
+
+    .garden-heading {
+      font-family: var(--font-serif);
+      font-size: 1.65rem;
+      font-weight: 500;
+      color: var(--burgundy);
+      margin-bottom: 0.25rem;
+    }
+
+    .garden-subheading {
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      color: var(--rose);
+      letter-spacing: 0.02em;
+    }
+
+    .garden-grid {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      list-style: none;
+      padding: 0;
+    }
+
+    .garden-item {
+      flex: 0 1 calc(33.333% - 0.75rem);
+      min-width: 140px;
+      max-width: 175px;
+      display: flex;
+    }
+
+    @media (max-width: 640px) {
+      .garden-item {
+        flex: 0 1 calc(33.333% - 0.6rem);
+        min-width: 130px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .garden-item {
+        flex: 0 1 calc(50% - 0.5rem);
+        min-width: 125px;
+      }
+    }
+
+    .flower-btn {
+      background: var(--paper);
+      border: 1px solid var(--paper-border);
+      border-radius: 6px;
+      padding: 1.15rem 0.65rem 0.95rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 220ms ease, border-color 220ms ease, opacity 250ms ease, box-shadow 220ms ease;
+      color: var(--ink);
+      text-decoration: none;
+      width: 100%;
+      user-select: none;
+      box-shadow: 0 4px 12px rgba(46, 32, 25, 0.04);
+    }
+
+    .flower-btn:hover:not([disabled]) {
+      transform: translateY(-3px);
+      border-color: var(--rose);
+      box-shadow: 0 8px 20px rgba(201, 123, 132, 0.16);
+    }
+
+    .flower-btn:active:not([disabled]) {
+      transform: translateY(0);
+    }
+
+    .flower-btn.is-full-disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      border-color: rgba(124, 138, 110, 0.2);
+    }
+
+    .flower-icon-wrap {
+      width: 68px;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.45rem;
+      transition: transform 200ms ease;
+    }
+
+    .flower-btn:hover:not([disabled]) .flower-icon-wrap {
+      transform: scale(1.08);
+    }
+
+    .flower-icon-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .flower-btn-label {
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--burgundy-deep);
+      text-align: center;
+      margin-bottom: 0.2rem;
+    }
+
+    /* Meaning Tag */
+    .flower-btn-meaning {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.76rem;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+      text-align: center;
+    }
+
+    /* Count badge showing how many of this flower are in the pot */
+    .flower-count-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      min-width: 22px;
+      height: 20px;
+      padding: 0 5px;
+      border-radius: 10px;
+      background: var(--burgundy);
+      color: var(--paper);
+      font-family: var(--font-sans);
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.6);
+      transition: opacity 250ms ease, transform 250ms ease;
+    }
+
+    .flower-count-badge.has-count {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* ==========================================================================
+       PROGRESS & TIE BOUQUET CTA
+       ========================================================================== */
+    .cta-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 2.25rem;
+      min-height: 56px;
+    }
+
+    .tie-bouquet-btn {
+      background-color: var(--burgundy);
+      color: var(--paper);
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 0.95rem 2.45rem;
+      border: 1px solid var(--burgundy-deep);
+      border-radius: 28px;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      box-shadow: 0 8px 24px rgba(107, 43, 58, 0.28);
+      transition: opacity 400ms ease, transform 400ms ease, background-color 200ms ease, box-shadow 200ms ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .tie-bouquet-btn.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+      animation: ctaPulse 2.8s ease-in-out infinite;
+    }
+
+    @keyframes ctaPulse {
+      0%, 100% { box-shadow: 0 8px 24px rgba(107, 43, 58, 0.28); }
+      50% { box-shadow: 0 12px 32px rgba(201, 123, 132, 0.45); }
+    }
+
+    .tie-bouquet-btn:hover:not([disabled]) {
+      background-color: var(--burgundy-deep);
+      transform: translateY(-2px);
+    }
+
+    .tie-bouquet-btn:active:not([disabled]) {
+      transform: translateY(1px);
+    }
+
+    .tie-bouquet-btn.is-completed {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.95);
+      transition: opacity 300ms ease, transform 300ms ease;
+    }
+
+    /* ==========================================================================
+       FINALE LETTER & WAX SEAL SECTION
+       ========================================================================== */
+    .finale-section {
+      width: 100%;
+      max-width: 640px;
+      margin-top: 3.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transform: translateY(24px);
+      transition: opacity 700ms var(--transition-smooth), transform 700ms var(--transition-smooth);
+    }
+
+    .finale-section.revealed {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .quiet-divider {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2.75rem;
+      gap: 1.25rem;
+    }
+
+    .divider-line {
+      height: 1px;
+      flex: 1;
+      background-color: rgba(107, 43, 58, 0.2);
+      max-width: 160px;
+    }
+
+    .divider-flourish {
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+    }
+
+    /* Sealed Envelope Presentation Card */
+    .letter-card {
+      background: var(--paper);
+      border: 1px solid var(--paper-border);
+      border-radius: 6px;
+      padding: 3.5rem 2.8rem 3rem 2.8rem;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+      transition: background-color 500ms ease, border-color 500ms ease;
+    }
+
+    /* Delicate rose watermark behind letter */
+    .letter-card::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(201, 123, 132, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @media (max-width: 480px) {
+      .letter-card {
+        padding: 2.5rem 1.6rem 2.25rem 1.6rem;
+      }
+    }
+
+    .letter-eyebrow {
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 1.5rem;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Luxury Golden Wax Seal */
+    .wax-seal-container {
+      margin-bottom: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wax-seal-badge {
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #9E2A3E, #5C1D29);
+      border: 2px solid var(--gold);
+      box-shadow: 0 6px 18px rgba(107, 43, 58, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      transition: transform 250ms ease, box-shadow 250ms ease;
+    }
+
+    .wax-seal-badge:hover {
+      transform: scale(1.06);
+      box-shadow: 0 8px 24px rgba(107, 43, 58, 0.45);
+    }
+
+    .wax-seal-monogram {
+      font-family: var(--font-serif);
+      font-size: 2.1rem;
+      font-style: italic;
+      color: var(--gold);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      user-select: none;
+    }
+
+    .wax-seal-label {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--rose);
+      margin-top: 0.65rem;
+    }
+
+    .letter-body {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.38rem;
+      line-height: 1.85;
+      color: var(--burgundy-deep);
+      margin-bottom: 2.5rem;
+      max-width: 56ch;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 480px) {
+      .letter-body {
+        font-size: 1.22rem;
+        line-height: 1.72;
+      }
+    }
+
+    .letter-signature-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding-right: 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .letter-sign-prefix {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--rose);
+      margin-bottom: -0.25rem;
+    }
+
+    .letter-signature {
+      font-family: var(--font-script);
+      font-size: 2.5rem;
+      color: var(--burgundy);
+      line-height: 1.1;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .signature-heart {
+      color: var(--rose);
+      font-size: 1.6rem;
+      animation: heartbeat 2.2s infinite ease-in-out;
+    }
+
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      14% { transform: scale(1.18); }
+      28% { transform: scale(1); }
+      42% { transform: scale(1.15); }
+      70% { transform: scale(1); }
+    }
+
+    /* Letter Action Buttons */
+    .letter-actions-bar {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .letter-action-btn {
+      background: var(--rose-light);
+      border: 1px solid var(--paper-border);
+      color: var(--burgundy);
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: background-color 200ms ease, transform 200ms ease, color 200ms ease;
+    }
+
+    .letter-action-btn:hover {
+      background: var(--burgundy);
+      color: var(--paper);
+      transform: translateY(-2px);
+    }
+
+    .letter-action-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Toast Notification */
+    .love-toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: var(--burgundy);
+      color: var(--paper);
+      border: 1px solid var(--gold);
+      border-radius: 24px;
+      padding: 0.7rem 1.6rem;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms ease, transform 300ms ease;
+    }
+
+    .love-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ==========================================================================
+       MODAL OVERLAY & CARD
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-bg);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transition: opacity 300ms ease, visibility 300ms ease;
+    }
+
+    .modal-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .modal-card {
+      background: var(--paper);
+      border: 1px solid var(--paper-border);
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      width: 100%;
+      max-width: 480px;
+      padding: 2.75rem 2.25rem 2.25rem 2.25rem;
+      position: relative;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 300ms var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .modal-overlay.is-open .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--ink);
+      opacity: 0.55;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: opacity 150ms ease;
+    }
+
+    .modal-close-btn:hover {
+      opacity: 0.95;
+    }
+
+    .modal-flower-preview {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 1.15rem;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.08));
+    }
+
+    .modal-eyebrow {
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--rose);
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+
+    .modal-flower-meaning-badge {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .modal-note {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.45rem;
+      line-height: 1.65;
+      color: var(--burgundy-deep);
+      margin-bottom: 1.85rem;
+      max-width: 38ch;
+    }
+
+    @media (max-width: 480px) {
+      .modal-card {
+        padding: 2rem 1.25rem 1.75rem 1.25rem;
+      }
+      .modal-note {
+        font-size: 1.25rem;
+      }
+    }
+
+    .modal-confirm-btn {
+      background-color: var(--burgundy);
+      color: var(--paper);
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 0.9rem 2rem;
+      border: 1px solid var(--burgundy-deep);
+      border-radius: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(107, 43, 58, 0.25);
+      transition: background-color 200ms ease, transform 200ms ease;
+      width: 100%;
+      max-width: 270px;
+    }
+
+    .modal-confirm-btn:hover:not([disabled]) {
+      background-color: var(--burgundy-deep);
+      transform: translateY(-1px);
+    }
+
+    .modal-confirm-btn[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Keepsake Postcard Print Preview Modal */
+    .postcard-preview-card {
+      border: 2px solid var(--gold);
+      background: var(--paper);
+      border-radius: 8px;
+      padding: 2.5rem;
+      box-shadow: var(--card-shadow);
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       PREFERS-REDUCED-MOTION
+       ========================================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      .header-section,
+      .bouquet-showcase {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+      }
+
+      .bouquet-flower-slot {
+        transition: none !important;
+        animation: none !important;
+      }
+
+      .bouquet-flower-slot.in-bouquet {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Falling Petals & Stardust Background Canvas -->
+  <canvas id="ambientCanvas" aria-hidden="true"></canvas>
+
+  <main class="app-container">
+
+    <!-- TOP AMBIENCE & AUDIO BAR -->
+    <aside class="ambience-bar" aria-label="Audio and Visual Settings">
+      <!-- Ambient Romantic Music Engine -->
+      <button type="button" id="musicToggleBtn" class="ambience-btn" aria-label="Play romantic ambient melody">
+        <span class="sound-waves" aria-hidden="true">
+          <span class="sound-bar"></span>
+          <span class="sound-bar"></span>
+          <span class="sound-bar"></span>
+        </span>
+        <span id="musicLabel">Melody: Off</span>
+      </button>
+
+      <!-- Romantic Theme Switch -->
+      <button type="button" id="themeToggleBtn" class="ambience-btn" aria-label="Toggle candlelight night mode">
+        <span id="themeIcon" aria-hidden="true">🕯️</span>
+        <span id="themeLabel">Candlelight</span>
+      </button>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="header-section">
+      <span class="eyebrow">
+        <span class="eyebrow-sparkle">✦</span>
+        Handcrafted for Manahil Jiii
+        <span class="eyebrow-sparkle">✦</span>
+      </span>
+      <h1 class="main-title">Build Your Own Bouquet</h1>
+      <p class="header-subtitle">Gather each bloom into your vase—each carries a quiet whisper of love and devotion</p>
+    </header>
+
+    <!-- VASE & BOUQUET DISPLAY -->
+    <section class="bouquet-showcase" aria-label="Bouquet in Vase">
+      <p id="statusCaption" class="status-caption" aria-live="polite">
+        your bouquet starts empty — go on, pick a bloom
+      </p>
+
+      <!-- Dynamic Pot Controls -->
+      <div id="potActionBar" class="pot-action-bar" style="opacity: 0; pointer-events: none;">
+        <span id="potCountDisplay" class="pot-count-tag">0 / 6 in vase</span>
+        <span>•</span>
+        <button type="button" id="undoBtn" class="pot-action-btn" aria-label="Remove last bloom from bouquet">remove last</button>
+        <span>•</span>
+        <button type="button" id="clearBtn" class="pot-action-btn" aria-label="Clear all blooms and start over">start over</button>
+      </div>
+
+      <!-- Interactive Whisper Tip on Vase Hover -->
+      <div id="vaseWhisperTip" class="vase-whisper-tip" aria-live="polite">
+        Tap any flower in the vase to read its message
+      </div>
+
+      <div class="vase-canvas-wrap">
+        <svg class="vase-svg" viewBox="0 0 500 480" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- Back Interior Lip of Vase (Rendered behind stems) -->
+          <ellipse cx="250" cy="275" rx="46" ry="11" fill="#E8DED1" stroke="#C7A05A" stroke-width="1.2" />
+          <ellipse cx="250" cy="277" rx="42" ry="9" fill="#4A1D28" opacity="0.3" />
+
+          <!-- ==============================================================
+               BOUQUET FLOWERS CONTAINER (6 Pre-configured Artful Slots)
+               Layered so back blooms sit naturally behind front blooms
+               ============================================================== -->
+          <g id="bouquetFlowersGroup">
+            <!-- Back layer slots -->
+            <g id="bouquet-slot-1" class="bouquet-flower-slot" data-slot="1"></g>
+            <g id="bouquet-slot-2" class="bouquet-flower-slot" data-slot="2"></g>
+            <!-- Mid layer slots -->
+            <g id="bouquet-slot-0" class="bouquet-flower-slot" data-slot="0"></g>
+            <g id="bouquet-slot-4" class="bouquet-flower-slot" data-slot="4"></g>
+            <!-- Front layer slots -->
+            <g id="bouquet-slot-3" class="bouquet-flower-slot" data-slot="3"></g>
+            <g id="bouquet-slot-5" class="bouquet-flower-slot" data-slot="5"></g>
+          </g>
+
+          <!-- ==============================================================
+               VASE FOREGROUND (Layered OVER stems so stems plunge realistically)
+               ============================================================== -->
+          <g id="vaseForeground">
+            <!-- Vase Body Ceramic -->
+            <path d="M 204 275
+                     C 188 320, 164 352, 168 395
+                     C 172 426, 204 445, 250 445
+                     C 296 445, 328 426, 332 395
+                     C 336 352, 312 320, 296 275
+                     Z"
+                  fill="#F5EDE4"
+                  stroke="#C7A05A"
+                  stroke-width="1.4" />
+
+            <!-- Ceramic Shading Tone (Right side) -->
+            <path d="M 270 276
+                     C 285 305, 316 345, 314 395
+                     C 313 420, 288 440, 250 445
+                     C 296 445, 328 426, 332 395
+                     C 336 352, 312 320, 296 275
+                     Z"
+                  fill="#E8DDD0" />
+
+            <!-- Glaze Specular Soft Highlight (Left side) -->
+            <path d="M 220 285
+                     C 212 320, 196 350, 198 395
+                     C 199 412, 208 426, 222 434
+                     C 214 422, 208 405, 208 390
+                     C 206 350, 220 320, 228 285 Z"
+                  fill="#FFFCF7"
+                  opacity="0.8" />
+
+            <!-- Front Rim Lip of Vase -->
+            <path d="M 204 275 C 204 284, 296 284, 296 275"
+                  fill="none"
+                  stroke="#C7A05A"
+                  stroke-width="2" />
+
+            <!-- Delicate Gold Accent Ring at Neck -->
+            <path d="M 210 295 C 220 300, 280 300, 290 295"
+                  fill="none"
+                  stroke="#C7A05A"
+                  stroke-width="1.2"
+                  opacity="0.85" />
+
+            <!-- Base Rim Line -->
+            <path d="M 218 440 C 230 446, 270 446, 282 440"
+                  fill="none"
+                  stroke="rgba(107, 43, 58, 0.25)"
+                  stroke-width="1.5" />
+          </g>
+
+          <!-- ==============================================================
+               TIED RIBBON & BOW (Unfurls when Bouquet is Tied)
+               ============================================================== -->
+          <g id="vaseRibbon" class="vase-ribbon">
+            <!-- Ribbon Band around Neck -->
+            <path d="M 207 288 Q 250 296 293 288 Q 250 299 207 288 Z" fill="#6B2B3A" />
+            <path d="M 208 289 Q 250 296 292 289" stroke="#C7A05A" stroke-width="1" fill="none" />
+            <!-- Satin Center Knot -->
+            <circle cx="250" cy="294" r="5.5" fill="#4A1D28" stroke="#C7A05A" stroke-width="1" />
+            <!-- Left Loop -->
+            <path d="M 246 293 C 228 280 218 302 245 296 Z" fill="#6B2B3A" stroke="#C7A05A" stroke-width="0.8" />
+            <!-- Right Loop -->
+            <path d="M 254 293 C 272 280 282 302 255 296 Z" fill="#6B2B3A" stroke="#C7A05A" stroke-width="0.8" />
+            <!-- Dangling Ribbon Tails -->
+            <path d="M 248 298 Q 236 322 240 338 Q 244 322 249 298 Z" fill="#6B2B3A" />
+            <path d="M 252 298 Q 262 325 258 342 Q 256 324 251 298 Z" fill="#6B2B3A" />
+          </g>
+
+        </svg>
+      </div>
+    </section>
+
+    <!-- GARDEN GRID SECTION -->
+    <section class="garden-section" aria-label="The Flower Garden">
+      <div class="garden-header-wrap">
+        <h2 class="garden-heading">The Garden</h2>
+        <p class="garden-subheading">Choose any flowers you desire — up to 6 in your vase</p>
+      </div>
+      <ul class="garden-grid" id="gardenGrid">
+        <!-- Injected via JavaScript from CONFIG -->
+      </ul>
+    </section>
+
+    <!-- PROGRESS CTA -->
+    <div class="cta-container">
+      <button id="tieBouquetBtn" class="tie-bouquet-btn" aria-label="Tie the bouquet">
+        <span>Tie the Bouquet</span>
+        <span aria-hidden="true">🎀</span>
+      </button>
+    </div>
+
+    <!-- FINALE SECTION -->
+    <section id="finaleSection" class="finale-section" aria-label="Closing Letter for Manahil jiii">
+      <div class="quiet-divider">
+        <div class="divider-line"></div>
+        <div class="divider-flourish">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="3" fill="#C7A05A"/>
+            <path d="M12 4C12 7 10 9 7 9C10 9 12 11 12 14C12 11 14 9 17 9C14 9 12 7 12 4Z" fill="#C97B84"/>
+          </svg>
+        </div>
+        <div class="divider-line"></div>
+      </div>
+
+      <article class="letter-card">
+        <!-- Luxury Wax Seal Monogram -->
+        <div class="wax-seal-container">
+          <div class="wax-seal-badge" title="Wax seal stamped for Manahil">
+            <span class="wax-seal-monogram">M</span>
+          </div>
+          <span class="wax-seal-label">Handcrafted with devotion</span>
+        </div>
+
+        <span class="letter-eyebrow">For Manahil Jiii</span>
+
+        <p id="finaleLetterContent" class="letter-body">
+          <!-- Populated from CONFIG.finaleText -->
+        </p>
+
+        <div class="letter-signature-wrap">
+          <span class="letter-sign-prefix">Forever & always yours,</span>
+          <div class="letter-signature">
+            Moiz <span class="signature-heart">♥</span>
+          </div>
+        </div>
+
+        <!-- Interactive Letter Actions -->
+        <div class="letter-actions-bar">
+          <button type="button" id="copyLetterBtn" class="letter-action-btn">
+            <span>💌</span>
+            <span>Copy Letter</span>
+          </button>
+          <button type="button" id="saveKeepsakeBtn" class="letter-action-btn">
+            <span>🖼️</span>
+            <span>Save Keepsake Card</span>
+          </button>
+          <button type="button" id="rearrangeBtn" class="letter-action-btn">
+            <span>🌸</span>
+            <span>Rearrange Flowers</span>
+          </button>
+        </div>
+      </article>
+    </section>
+
+  </main>
+
+  <!-- MODAL OVERLAY & CARD -->
+  <div id="flowerModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalFlowerName" aria-describedby="modalNoteText">
+    <div class="modal-card" id="modalCard">
+      <button type="button" class="modal-close-btn" id="modalCloseBtn" aria-label="Close modal">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+
+      <div class="modal-flower-preview" id="modalFlowerPreview" aria-hidden="true">
+        <!-- Clone of active flower SVG icon -->
+      </div>
+
+      <span class="modal-eyebrow" id="modalFlowerName">Flower Name</span>
+      <span class="modal-flower-meaning-badge" id="modalFlowerMeaning">Botanical Meaning</span>
+      <p class="modal-note" id="modalNoteText">"Personal note text goes here."</p>
+
+      <button type="button" class="modal-confirm-btn" id="modalConfirmBtn">
+        Add it to the Bouquet
+      </button>
+    </div>
+  </div>
+
+  <!-- KEEPSAKE SOUVENIR MODAL -->
+  <div id="keepsakeModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Keepsake Card">
+    <div class="modal-card keepsake-preview-card" id="keepsakeCard">
+      <button type="button" class="modal-close-btn" id="keepsakeCloseBtn" aria-label="Close keepsake">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </button>
+      <span class="eyebrow">✦ Floral Souvenir ✦</span>
+      <h3 style="font-family: var(--font-serif); font-size: 2rem; color: var(--burgundy); margin: 0.5rem 0;">A Bouquet For Manahil Jiii</h3>
+      <div id="keepsakeBouquetSummary" style="font-family: var(--font-sans); font-size: 0.85rem; color: var(--rose); margin-bottom: 1.25rem;"></div>
+      <p style="font-family: var(--font-serif); font-style: italic; font-size: 1.18rem; line-height: 1.7; color: var(--burgundy-deep); margin-bottom: 1.5rem;" id="keepsakeLetterText"></p>
+      <div style="font-family: var(--font-script); font-size: 2.2rem; color: var(--burgundy); margin-bottom: 1.5rem;">Forever yours, Moiz ♥</div>
+      <button type="button" id="printPostcardBtn" class="modal-confirm-btn" style="max-width: 200px;">Print / Save PDF</button>
+    </div>
+  </div>
+
+  <!-- Toast Element -->
+  <div id="loveToast" class="love-toast">Copied with love for Manahil Jiii! ❤️</div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT APPLICATION LOGIC
+       ========================================================================== -->
+  <script>
+    /**
+     * ═══════════════════════════════════════════════════════════════════════
+     * CONFIGURATION & CONTENT — DEDICATED TO MANAHIL JIII
+     * ═══════════════════════════════════════════════════════════════════════
+     */
+    const CONFIG = {
+      maxFlowers: 6,
+      minFlowersToTie: 3,
+      flowers: [
+        {
+          id: 'rose',
+          name: 'Rose',
+          meaning: 'Deep Love & Devotion',
+          note: 'Some feelings don’t ask for permission—they simply take root, quiet and certain, the way I found myself loving you.',
+          color: '#6B2B3A',
+          petalColor: '#C97B84'
+        },
+        {
+          id: 'spider_lily',
+          name: 'Spider Lily',
+          meaning: 'Rare & Breathtaking',
+          note: 'Out of every bloom in every world, there is nothing as rare, breathtaking, and unforgettable as you.',
+          color: '#801B2C',
+          petalColor: '#6B2B3A'
+        },
+        {
+          id: 'sakura',
+          name: 'Cherry Blossom',
+          meaning: 'Tender Sweetness',
+          note: 'Like cherry blossoms dancing on a spring breeze, every small moment with you feels sweet, gentle, and utterly magical.',
+          color: '#D97D91',
+          petalColor: '#F8B4C0'
+        },
+        {
+          id: 'tulip',
+          name: 'Tulip',
+          meaning: 'Eternal Grace',
+          note: 'In every crowded room and every quiet evening, my eyes will always look for the grace only you carry.',
+          color: '#B84A62',
+          petalColor: '#D87D88'
+        },
+        {
+          id: 'peony',
+          name: 'Peony',
+          meaning: 'Effortless Warmth',
+          note: 'You bring an effortless warmth to ordinary days, softening every hard edge the world tries to give us.',
+          color: '#A8485B',
+          petalColor: '#E29CA5'
+        },
+        {
+          id: 'sunflower',
+          name: 'Sunflower',
+          meaning: 'Brightest Constant',
+          note: 'Thank you for being my brightest constant—the light I turn toward without ever having to think.',
+          color: '#C7A05A',
+          petalColor: '#D9B46A'
+        },
+        {
+          id: 'jasmine',
+          name: 'Sweet Jasmine',
+          meaning: 'Pure Peace & Comfort',
+          note: 'Your presence is pure peace—a gentle comfort that makes my heart feel completely at home whenever you are near.',
+          color: '#D8C2AF',
+          petalColor: '#FFFDF9'
+        },
+        {
+          id: 'lavender',
+          name: 'Lavender',
+          meaning: 'Serene Sanctuary',
+          note: 'With you, even the busiest storm in my mind slows down into peace, quiet stillness, and home.',
+          color: '#7B6282',
+          petalColor: '#9F83A5'
+        },
+        {
+          id: 'daisy',
+          name: 'Daisy',
+          meaning: 'Unscripted Joy',
+          note: 'I adore your gentle laughter, your honesty, and all the sweet, unscripted moments we share.',
+          color: '#C7A05A',
+          petalColor: '#FFFCF7'
+        }
+      ],
+      finaleText: 'If I could gather every sunrise we’ve shared, every quiet glance across a table, and every laugh that lingered long after the night was over, they would still only begin to capture what you mean to me. You make ordinary days feel like poetry, Manahil jiii. You’ve turned my world into something infinitely softer, brighter, and more beautiful simply by being in it. Thank you for your kindness, your patient heart, and the warmth you give so freely. Whatever tomorrow brings, I choose you—today, tomorrow, and in every season yet to bloom.'
+    };
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════════
+     * INLINE SVG ICONS FOR GARDEN BUTTONS
+     * Handcrafted botanical silhouettes
+     * ═══════════════════════════════════════════════════════════════════════
+     */
+    const FLOWER_ICONS = {
+      rose: `
+        <svg viewBox="0 0 64 64" class="flower-icon-svg" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 46 Q31 56 32 60" stroke="#7C8A6E" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <path d="M32 52 Q38 48 42 50 Q38 54 32 53 Z" fill="#7C8A6E"/>
+          <circle cx="32" cy="30" r="18" fill="#6B2B3A"/>
+          <path d="M18 26 C15 14 30 8 38 12 C46 16 48 30 40 38 C32 46 20 40 18 26 Z" fill="#7A3243"/>
+          <path d="M22 28 C20 18 32 14 38 18 C44 22 42 34 36 36 C30 38 24 34 22 28 Z" fill="#C97B84"/>
+          <path d="M26 28 C25 22 34 20 37 24 C40 28 36 33 32 33 C28 33 27 30 26 28 Z" fill="#E29CA5"/>
+          <circle cx="32" cy="27" r="2.5" fill="#4A1D28"/>
+        </svg>
+      `,
+      spider_lily: `
+        <svg viewBox="0 0 64 64" class="flower-icon-svg" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="spiderIconGlow" cx="50%" cy="45%" r="50%">
+              <stop offset="0%" stop-color="#C97B84" stop-opacity="0.38" />
+              <stop offset="65%" stop-color="#801B2C" stop-opacity="0.12" />
+              <stop offset="100%" stop-color="#801B2C" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+          <circle cx="32" cy="28" r="23" fill="url(#spiderIconGlow)" />
+          <path d="M32 44 L32 60" stroke="#7C8A6E" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M29 44 Q32 47 35 44 Z" fill="#7C8A6E"/>
+          <path d="M32 36 C24 39 12 38 6 30 C12 28 22 31 32 35 Z" fill="#6B2B3A"/>
+          <path d="M32 36 C22 31 10 24 8 13 C14 17 24 26 32 35 Z" fill="#801B2C"/>
+          <path d="M32 36 C25 24 19 12 21 4 C26 10 29 22 32 35 Z" fill="#9E2A3E"/>
+          <path d="M32 36 C39 24 45 12 43 4 C38 10 35 22 32 35 Z" fill="#9E2A3E"/>
+          <path d="M32 36 C42 31 54 24 56 13 C50 17 40 26 32 35 Z" fill="#801B2C"/>
+          <path d="M32 36 C40 39 52 38 58 30 C52 28 42 31 32 35 Z" fill="#6B2B3A"/>
+          <g stroke="#C7A05A" stroke-width="1.15" fill="none" stroke-linecap="round">
+            <path d="M32 35 Q18 28 4 15 Q2 10 7 7"/>
+            <path d="M32 35 Q22 18 14 3 Q16 -1 20 2"/>
+            <path d="M32 35 Q27 14 26 -2 Q29 -4 31 -1"/>
+            <path d="M32 35 Q37 14 38 -2 Q35 -4 33 -1"/>
+            <path d="M32 35 Q42 18 50 3 Q48 -1 44 2"/>
+            <path d="M32 35 Q46 28 60 15 Q62 10 57 7"/>
+          </g>
+          <circle cx="32" cy="35" r="3" fill="#4A1D28"/>
+        </svg>
+      `,
+      sakura: `
+        <svg viewBox="0 0 64 64" class="flower-icon-svg" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 46 L32 60" stroke="#7C8A6E" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 52 Q38 48 42 50 Q38 54 32 53 Z" fill="#7C8A6E"/>
+          <g transform="translate(32, 28)">
+            <g fill="#F8B4C0" stroke="#E28699" stroke-width="0.8">
+              <path d="M0 0 C-9 -9 -11 -21 -4 -24 C-1 -25 0 -21 0 -21 C0 -21 1 -25 4 -24 C11 -21 9 -9 0 0 Z"/>
+              <path d="M0 0 C-9 -9 -11 -21 -4 -24 C-1 -25 0 -21 0 -21 C0 -21 1 -25 4 -24 C11 -21 9 -9 0 0 Z" transform="rotate(72)"/>
+              <path d="M0 0 C-9 -9 -11 -21 -4 -24 C-1 -25 0 -21 0 -21 C0 -21 1 -25 4 -24 C11 -21 9 -9 0 0 Z" transform="rotate(144)"/>
+              <path d="M0 0 C-9 -9 -11 -21 -4 -24 C-1 -25 0 -21 0 -21 C0 -21 1 -25 4 -24 C11 -21 9 -9 0 0 Z" transform="rotate(216)"/>
+              <path d="M0 0 C-9 -9 -11 -21 -4 -24 C-1 -25 0 -21 0 -21 C0 -21 1 -25 4 -24 C11 -21 9 -9 0 0 Z" transform="rotate(288)"/>
+            </g>
+            <circle cx="0" cy="0" r="4.5" fill="#C93B58"/>
+            <circle cx="0" cy="0" r="2.2" fill="#FFEAA7"/>
+          </g>
+        </svg>
+      `,
+      tulip: `
+        <svg viewBox="0 0 64 64" class="flower-icon-svg" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 40 L32 60" stroke="#7C8A6E" stroke-width="2.8" stroke-linecap="round"/>
+          <path d="M32 54 Q22 48 20 36 Q28 42 32 48 Z" fill="#7C8A6E"/>
+          <path d="M32 40 C18 36 16 18 24 10 C28 22 30 32 32 40 Z" fill="#C97B84"/>
+          <path d="M32 40 C46 36 48 18 40 10 C36 22 34 32 32 40 Z" fill="#D87D88"/>
+          <path d="M32 40 C24 30 24 14 32 6 C40 14 40 30 32 40 Z" fill="#E29CA5"/>
+        </svg>
+      `,
+      peony: `
+        <svg viewBox="0 0 64 64" class="flower-icon-svg" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 48 L32 60" stroke="#7C8A6E" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 54 Q40 50 44 44 Q38 52 32 53 Z" fill="#7C8A6E"/>
+          <circle cx="32" cy="28" r="20" fill="#A8485B"/>
+          <path d="M16 26 Q12 14 26 10 Q38 8 46 16 Q52 28 42 38 Q30 46 18 38 Q12 32 16 26 Z" fill="#C97B84"/>
+          <path d="M20 25 Q18 16 28 14 Q38 12 42 20 Q46 28 38 34 Q28 40 22 33 Z" fill="#D98A93"/>
+          <path d="M24 25 Q22 18 30 17 Q36 16 38 22 Q40 28 34 31 Q28 34 25 29 Z" fill="#E8A7AF"/>
+          <ellipse cx="32" cy="25" rx="5" ry="4" fill="#F4C2C8"/>
+          <circle cx="30" cy="24" r="1.2" fill="#C7A05A"/>
+          <circle cx="34" cy="25" r="1.2" fill="#C7A05A"/>
+        </svg>
+      `,
+      sunflower: `
+        <svg viewBox="0 0 64 64" class="flower-icon-svg" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 48 L32 60" stroke="#7C8A6E" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 55 Q24 50 20 54 Q24 48 32 51 Z" fill="#7C8A6E"/>
+          <g fill="#C7A05A" transform="translate(32, 28)">
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(30)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(60)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(90)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(120)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(150)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(210)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(240)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(270)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(300)"/>
+            <ellipse cx="0" cy="-17" rx="3.5" ry="7" transform="rotate(330)"/>
+          </g>
+          <circle cx="32" cy="28" r="10" fill="#4A1D28"/>
+          <circle cx="32" cy="28" r="8" fill="#2E2019"/>
+          <circle cx="30" cy="26" r="1.2" fill="#C7A05A"/>
+        </svg>
+      `,
+      jasmine: `
+        <svg viewBox="0 0 64 64" class="flower-icon-svg" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 44 L32 60" stroke="#7C8A6E" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 50 Q24 45 20 50 Q24 44 32 47 Z" fill="#7C8A6E"/>
+          <g transform="translate(32, 28)">
+            <g fill="#FFFDF9" stroke="#E6D3C2" stroke-width="0.8">
+              <path d="M0 0 C-7 -7 -7 -20 0 -24 C7 -20 7 -7 0 0 Z"/>
+              <path d="M0 0 C-7 -7 -7 -20 0 -24 C7 -20 7 -7 0 0 Z" transform="rotate(60)"/>
+              <path d="M0 0 C-7 -7 -7 -20 0 -24 C7 -20 7 -7 0 0 Z" transform="rotate(120)"/>
+              <path d="M0 0 C-7 -7 -7 -20 0 -24 C7 -20 7 -7 0 0 Z" transform="rotate(180)"/>
+              <path d="M0 0 C-7 -7 -7 -20 0 -24 C7 -20 7 -7 0 0 Z" transform="rotate(240)"/>
+              <path d="M0 0 C-7 -7 -7 -20 0 -24 C7 -20 7 -7 0 0 Z" transform="rotate(300)"/>
+            </g>
+            <circle cx="0" cy="0" r="4.5" fill="#E5B25D"/>
+            <circle cx="0" cy="0" r="2.2" fill="#C7892E"/>
+          </g>
+        </svg>
+      `,
+      lavender: `
+        <svg viewBox="0 0 64 64" class="flower-icon-svg" xmlns="http://www.w3.org/2000/svg">
+          <line x1="32" y1="12" x2="32" y2="60" stroke="#7C8A6E" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 50 Q24 45 20 40 Q28 44 32 46 Z" fill="#7C8A6E"/>
+          <ellipse cx="27" cy="40" rx="4.5" ry="3" fill="#8E708E" transform="rotate(-15 27 40)"/>
+          <ellipse cx="37" cy="38" rx="4.5" ry="3" fill="#9F83A5" transform="rotate(15 37 38)"/>
+          <ellipse cx="32" cy="39" rx="4.5" ry="3" fill="#7B6282"/>
+          <ellipse cx="27" cy="29" rx="4" ry="2.8" fill="#8E708E" transform="rotate(-15 27 29)"/>
+          <ellipse cx="37" cy="27" rx="4" ry="2.8" fill="#B397B8" transform="rotate(15 37 27)"/>
+          <ellipse cx="32" cy="28" rx="4" ry="2.8" fill="#8E708E"/>
+          <ellipse cx="32" cy="17" rx="3.5" ry="2.5" fill="#9F83A5"/>
+          <ellipse cx="32" cy="10" rx="2.5" ry="2" fill="#7B6282"/>
+        </svg>
+      `,
+      daisy: `
+        <svg viewBox="0 0 64 64" class="flower-icon-svg" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 44 L32 60" stroke="#7C8A6E" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 52 Q40 48 42 42 Q36 50 32 50 Z" fill="#7C8A6E"/>
+          <g fill="#FFFCF7" stroke="rgba(201, 123, 132, 0.3)" stroke-width="0.7" transform="translate(32, 28)">
+            <ellipse cx="0" cy="-16" rx="4" ry="8"/>
+            <ellipse cx="0" cy="-16" rx="4" ry="8" transform="rotate(36)"/>
+            <ellipse cx="0" cy="-16" rx="4" ry="8" transform="rotate(72)"/>
+            <ellipse cx="0" cy="-16" rx="4" ry="8" transform="rotate(108)"/>
+            <ellipse cx="0" cy="-16" rx="4" ry="8" transform="rotate(144)"/>
+            <ellipse cx="0" cy="-16" rx="4" ry="8" transform="rotate(180)"/>
+            <ellipse cx="0" cy="-16" rx="4" ry="8" transform="rotate(216)"/>
+            <ellipse cx="0" cy="-16" rx="4" ry="8" transform="rotate(252)"/>
+            <ellipse cx="0" cy="-16" rx="4" ry="8" transform="rotate(288)"/>
+            <ellipse cx="0" cy="-16" rx="4" ry="8" transform="rotate(324)"/>
+          </g>
+          <circle cx="32" cy="28" r="8" fill="#C7A05A"/>
+          <circle cx="32" cy="28" r="6" fill="#D4AF37"/>
+        </svg>
+      `
+    };
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════════
+     * INLINE SVG FLOWER HEADS FOR BOUQUET SLOTS
+     * Anchored at (0, 0) to align with stem tips
+     * ═══════════════════════════════════════════════════════════════════════
+     */
+    const FLOWER_HEADS = {
+      rose: `
+        <path d="M -12 12 Q 0 24 12 12 Q 0 6 -12 12 Z" fill="#7C8A6E" />
+        <path d="M -26 0 C -36 -24 -14 -42 0 -36 C 14 -42 36 -24 26 0 C 18 16 -18 16 -26 0 Z" fill="#6B2B3A" />
+        <path d="M -28 -8 C -32 -26 -10 -40 0 -38 C 10 -40 32 -26 28 -8 C 22 10 -22 10 -28 -8 Z" fill="#7A3243" />
+        <path d="M -20 -4 C -24 -24 0 -34 16 -24 C 24 -12 16 8 0 8 C -14 8 -18 6 -20 -4 Z" fill="#C97B84" />
+        <path d="M 18 -6 C 22 -22 -4 -30 -16 -20 C -22 -8 -12 6 2 6 C 14 6 16 4 18 -6 Z" fill="#B35868" />
+        <path d="M -10 -10 C -12 -22 8 -24 10 -12 C 10 -4 -8 -2 -10 -10 Z" fill="#4A1D28" />
+        <path d="M -4 -12 C -6 -18 6 -18 5 -12 C 4 -8 -2 -8 -4 -12 Z" fill="#E29CA5" />
+        <circle cx="1" cy="-11" r="1.5" fill="#C7A05A" />
+      `,
+      spider_lily: `
+        <path d="M -10 8 Q 0 18 10 8 Q 0 2 -10 8 Z" fill="#7C8A6E" />
+        <path d="M 0 -2 C -18 2 -38 0 -52 -16 C -40 -20 -22 -14 0 -4 Z" fill="#6B2B3A" />
+        <path d="M 0 -2 C 18 2 38 0 52 -16 C 40 -20 22 -14 0 -4 Z" fill="#6B2B3A" />
+        <path d="M 0 -3 C -20 -12 -42 -28 -46 -48 C -34 -40 -18 -24 0 -5 Z" fill="#801B2C" />
+        <path d="M 0 -3 C 20 -12 42 -28 46 -48 C 34 -40 18 -24 0 -5 Z" fill="#801B2C" />
+        <path d="M 0 -4 C -14 -22 -22 -44 -16 -62 C -8 -50 -4 -28 0 -6 Z" fill="#9E2A3E" />
+        <path d="M 0 -4 C 14 -22 22 -44 16 -62 C 8 -50 4 -28 0 -6 Z" fill="#9E2A3E" />
+        <path d="M 0 -4 C -8 -16 -12 -38 -6 -50 C -1 -36 1 -18 0 -4 Z" fill="#B33246" />
+        <path d="M 0 -4 C 8 -16 12 -38 6 -50 C 1 -36 -1 -18 0 -4 Z" fill="#B33246" />
+        <g stroke="#C7A05A" stroke-width="1.35" fill="none" stroke-linecap="round">
+          <path d="M 0 -5 Q -28 -18 -55 -42 Q -62 -52 -54 -58" />
+          <path d="M 0 -5 Q -24 -36 -40 -70 Q -42 -80 -32 -82" />
+          <path d="M 0 -5 Q -14 -46 -16 -88 Q -15 -96 -7 -94" />
+          <path d="M 0 -5 Q 14 -46 16 -88 Q 15 -96 7 -94" />
+          <path d="M 0 -5 Q 24 -36 40 -70 Q 42 -80 32 -82" />
+          <path d="M 0 -5 Q 28 -18 55 -42 Q 62 -52 54 -58" />
+        </g>
+        <circle cx="0" cy="-5" r="4.5" fill="#4A1D28" />
+      `,
+      sakura: `
+        <path d="M -10 10 Q 0 18 10 10 Q 0 4 -10 10 Z" fill="#7C8A6E" />
+        <g fill="#F8B4C0" stroke="#E28699" stroke-width="1.2">
+          <path d="M0 0 C-18 -18 -22 -40 -7 -46 C-2 -48 0 -40 0 -40 C0 -40 2 -48 7 -46 C22 -40 18 -18 0 0 Z"/>
+          <path d="M0 0 C-18 -18 -22 -40 -7 -46 C-2 -48 0 -40 0 -40 C0 -40 2 -48 7 -46 C22 -40 18 -18 0 0 Z" transform="rotate(72)"/>
+          <path d="M0 0 C-18 -18 -22 -40 -7 -46 C-2 -48 0 -40 0 -40 C0 -40 2 -48 7 -46 C22 -40 18 -18 0 0 Z" transform="rotate(144)"/>
+          <path d="M0 0 C-18 -18 -22 -40 -7 -46 C-2 -48 0 -40 0 -40 C0 -40 2 -48 7 -46 C22 -40 18 -18 0 0 Z" transform="rotate(216)"/>
+          <path d="M0 0 C-18 -18 -22 -40 -7 -46 C-2 -48 0 -40 0 -40 C0 -40 2 -48 7 -46 C22 -40 18 -18 0 0 Z" transform="rotate(288)"/>
+        </g>
+        <g fill="#FFF0F5" opacity="0.9">
+          <path d="M0 0 C-11 -11 -14 -26 -4 -30 C-1 -31 0 -26 0 -26 C0 -26 1 -31 4 -30 C14 -26 11 -11 0 0 Z"/>
+          <path d="M0 0 C-11 -11 -14 -26 -4 -30 C-1 -31 0 -26 0 -26 C0 -26 1 -31 4 -30 C14 -26 11 -11 0 0 Z" transform="rotate(72)"/>
+          <path d="M0 0 C-11 -11 -14 -26 -4 -30 C-1 -31 0 -26 0 -26 C0 -26 1 -31 4 -30 C14 -26 11 -11 0 0 Z" transform="rotate(144)"/>
+          <path d="M0 0 C-11 -11 -14 -26 -4 -30 C-1 -31 0 -26 0 -26 C0 -26 1 -31 4 -30 C14 -26 11 -11 0 0 Z" transform="rotate(216)"/>
+          <path d="M0 0 C-11 -11 -14 -26 -4 -30 C-1 -31 0 -26 0 -26 C0 -26 1 -31 4 -30 C14 -26 11 -11 0 0 Z" transform="rotate(288)"/>
+        </g>
+        <circle cx="0" cy="0" r="7" fill="#C93B58"/>
+        <g stroke="#C7A05A" stroke-width="1.6" fill="none">
+          <line x1="0" y1="0" x2="-4" y2="-12"/>
+          <line x1="0" y1="0" x2="8" y2="-10"/>
+          <line x1="0" y1="0" x2="12" y2="4"/>
+          <line x1="0" y1="0" x2="2" y2="13"/>
+          <line x1="0" y1="0" x2="-10" y2="7"/>
+        </g>
+        <circle cx="-4" cy="-12" r="2.2" fill="#FFEAA7"/>
+        <circle cx="8" cy="-10" r="2.2" fill="#FFEAA7"/>
+        <circle cx="12" cy="4" r="2.2" fill="#FFEAA7"/>
+        <circle cx="2" cy="13" r="2.2" fill="#FFEAA7"/>
+        <circle cx="-10" cy="7" r="2.2" fill="#FFEAA7"/>
+      `,
+      tulip: `
+        <path d="M 0 0 C -18 -15 -16 -46 0 -58 C 16 -46 18 -15 0 0 Z" fill="#6B2B3A" />
+        <path d="M 0 0 C -22 -14 -26 -42 -8 -54 C -3 -30 0 -10 0 0 Z" fill="#C97B84" />
+        <path d="M 0 0 C 22 -14 26 -42 8 -54 C 3 -30 0 -10 0 0 Z" fill="#D98A93" />
+        <path d="M 0 0 C -12 -12 -12 -38 0 -52 C 12 -38 12 -12 0 0 Z" fill="#E29CA5" />
+      `,
+      peony: `
+        <circle cx="0" cy="-6" r="36" fill="#B85D6F" />
+        <path d="M -30 -14 Q -36 -32 -18 -38 Q 0 -44 18 -38 Q 36 -32 30 -14 Q 36 12 18 26 Q 0 32 -18 26 Q -36 12 -30 -14 Z" fill="#C97B84" />
+        <path d="M -22 -12 Q -26 -26 -12 -32 Q 0 -38 12 -32 Q 26 -26 22 -12 Q 26 8 12 18 Q 0 24 -12 18 Q -26 8 -22 -12 Z" fill="#D98A93" />
+        <path d="M -14 -9 Q -18 -20 -7 -24 Q 0 -28 7 -24 Q 18 -20 14 -9 Q 18 4 7 10 Q 0 14 -7 10 Q -18 4 -14 -9 Z" fill="#E8A7AF" />
+        <ellipse cx="0" cy="-8" rx="9" ry="7" fill="#F4C2C8" />
+        <circle cx="-3" cy="-9" r="1.8" fill="#C7A05A" />
+        <circle cx="3" cy="-7" r="2" fill="#C7A05A" />
+      `,
+      sunflower: `
+        <g fill="#C7A05A">
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(30)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(60)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(90)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(120)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(150)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(180)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(210)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(240)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(270)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(300)" />
+          <path d="M 0 -14 C -6 -24 -4 -38 0 -44 C 4 -38 6 -24 0 -14 Z" transform="rotate(330)" />
+        </g>
+        <circle cx="0" cy="0" r="16" fill="#4A1D28" />
+        <circle cx="0" cy="0" r="13" fill="#2E2019" />
+        <circle cx="0" cy="0" r="2" fill="#C7A05A" />
+      `,
+      jasmine: `
+        <path d="M -10 10 Q 0 18 10 10 Q 0 4 -10 10 Z" fill="#7C8A6E" />
+        <g fill="#FFFDF9" stroke="#E6D3C2" stroke-width="1.2">
+          <path d="M0 0 C-15 -15 -15 -42 0 -48 C15 -42 15 -15 0 0 Z"/>
+          <path d="M0 0 C-15 -15 -15 -42 0 -48 C15 -42 15 -15 0 0 Z" transform="rotate(60)"/>
+          <path d="M0 0 C-15 -15 -15 -42 0 -48 C15 -42 15 -15 0 0 Z" transform="rotate(120)"/>
+          <path d="M0 0 C-15 -15 -15 -42 0 -48 C15 -42 15 -15 0 0 Z" transform="rotate(180)"/>
+          <path d="M0 0 C-15 -15 -15 -42 0 -48 C15 -42 15 -15 0 0 Z" transform="rotate(240)"/>
+          <path d="M0 0 C-15 -15 -15 -42 0 -48 C15 -42 15 -15 0 0 Z" transform="rotate(300)"/>
+        </g>
+        <circle cx="0" cy="0" r="12" fill="#FFF6EA" opacity="0.9"/>
+        <circle cx="0" cy="0" r="7" fill="#E5B25D"/>
+        <circle cx="0" cy="0" r="3.5" fill="#C7892E"/>
+      `,
+      lavender: `
+        <line x1="0" y1="14" x2="0" y2="-75" stroke="#7C8A6E" stroke-width="3" stroke-linecap="round" />
+        <ellipse cx="-7" cy="4" rx="6" ry="4" fill="#8E708E" transform="rotate(-15 -7 4)" />
+        <ellipse cx="7" cy="2" rx="6" ry="4" fill="#9F83A5" transform="rotate(15 7 2)" />
+        <ellipse cx="0" cy="0" rx="6" ry="4" fill="#7B6282" />
+        <ellipse cx="-6" cy="-14" rx="5.5" ry="3.8" fill="#8E708E" transform="rotate(-15 -6 -14)" />
+        <ellipse cx="6" cy="-16" rx="5.5" ry="3.8" fill="#B397B8" transform="rotate(15 6 -16)" />
+        <ellipse cx="0" cy="-15" rx="5.5" ry="3.8" fill="#8E708E" />
+        <ellipse cx="-5" cy="-44" rx="4.5" ry="3.2" fill="#B397B8" transform="rotate(-15 -5 -44)" />
+        <ellipse cx="5" cy="-46" rx="4.5" ry="3.2" fill="#8E708E" transform="rotate(15 5 -46)" />
+        <ellipse cx="0" cy="-45" rx="4.5" ry="3.2" fill="#9F83A5" />
+        <ellipse cx="0" cy="-68" rx="3.2" ry="2.5" fill="#7B6282" />
+        <ellipse cx="0" cy="-75" rx="2.5" ry="2.2" fill="#8E708E" />
+      `,
+      daisy: `
+        <g fill="#FFFCF7" stroke="rgba(201, 123, 132, 0.3)" stroke-width="0.8">
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(30)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(60)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(90)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(120)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(150)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(180)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(210)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(240)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(270)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(300)" />
+          <ellipse cx="0" cy="-22" rx="5.5" ry="11" transform="rotate(330)" />
+        </g>
+        <circle cx="0" cy="0" r="11" fill="#C7A05A" />
+        <circle cx="0" cy="0" r="8.5" fill="#D4AF37" />
+      `
+    };
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════════
+     * 6 BOUQUET SLOTS IN VASE (Geometry & Aesthetic Fill Sequence)
+     * ═══════════════════════════════════════════════════════════════════════
+     */
+    const SLOTS = [
+      { id: 0, base: [246, 278], ctrl: [206, 238], tip: [146, 176], angle: -24, leaf: 'M 235 270 Q 168 258 146 212 Q 182 218 218 254 Z' },
+      { id: 1, base: [248, 278], ctrl: [230, 200], tip: [196, 118], angle: -11, leaf: 'M 240 260 Q 210 248 198 238 Q 216 242 232 252 Z' },
+      { id: 2, base: [252, 278], ctrl: [262, 205], tip: [275, 132], angle: 8,   leaf: 'M 264 218 Q 296 202 316 210 Q 296 222 268 222 Z' },
+      { id: 3, base: [250, 278], ctrl: [242, 242], tip: [232, 196], angle: -5,  leaf: 'M 242 242 Q 204 232 184 246 Q 208 250 236 248 Z' },
+      { id: 4, base: [254, 278], ctrl: [296, 238], tip: [352, 172], angle: 22,  leaf: 'M 288 240 Q 330 228 352 248 Q 320 258 295 248 Z' },
+      { id: 5, base: [252, 278], ctrl: [286, 262], tip: [342, 234], angle: 34,  leaf: 'M 284 268 Q 312 276 328 266 Q 306 262 288 264 Z' }
+    ];
+
+    const SLOT_FILL_ORDER = [3, 2, 0, 4, 1, 5];
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════════
+     * ROMANTIC PROCEDURAL WEB AUDIO ENGINE (Zero external dependencies)
+     * ═══════════════════════════════════════════════════════════════════════
+     */
+    class RomanticSoundEngine {
+      constructor() {
+        this.ctx = null;
+        this.isMuted = false;
+        this.bgmPlaying = false;
+        this.bgmTimer = null;
+        this.chordStep = 0;
+        this.masterGain = null;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            this.ctx = new AudioContextClass();
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.setValueAtTime(0.7, this.ctx.currentTime);
+            this.masterGain.connect(this.ctx.destination);
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      // Soft crystal bell chime when selecting a bloom
+      playChime(noteFreq = 523.25) {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(2200, now);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(noteFreq, now);
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.18, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+
+        osc.start(now);
+        osc.stop(now + 1.25);
+      }
+
+      // Flower confirmed into bouquet: sparkling harmonic chime
+      playFlowerPlaced(stepIndex = 0) {
+        const scale = [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50]; // Pentatonic: C5 to C6
+        const freq = scale[Math.min(stepIndex, scale.length - 1)];
+        this.playChime(freq);
+
+        setTimeout(() => {
+          this.playChime(freq * 1.5); // Warm fifth overtone
+        }, 80);
+      }
+
+      // Grand celebration harp arpeggio when tying bouquet
+      playTyingCelebration() {
+        if (this.isMuted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const harpNotes = [261.63, 329.63, 392.00, 493.88, 523.25, 659.25, 783.99, 987.77, 1046.50];
+        harpNotes.forEach((freq, idx) => {
+          setTimeout(() => {
+            this.playChime(freq);
+          }, idx * 110);
+        });
+      }
+
+      // Background ambient romantic melody
+      toggleMelody(callback) {
+        this.init();
+        if (!this.bgmPlaying) {
+          this.bgmPlaying = true;
+          this.chordStep = 0;
+          this.loopMelody();
+          if (callback) callback(true);
+        } else {
+          this.bgmPlaying = false;
+          if (this.bgmTimer) clearTimeout(this.bgmTimer);
+          if (callback) callback(false);
+        }
+      }
+
+      loopMelody() {
+        if (!this.bgmPlaying || !this.ctx) return;
+
+        // Dreamy chord progressions (Fmaj9, G6, Em7, Am9)
+        const progressions = [
+          { bass: 174.61, chords: [349.23, 440.00, 523.25, 659.25] }, // F
+          { bass: 196.00, chords: [392.00, 493.88, 587.33, 659.25] }, // G
+          { bass: 164.81, chords: [329.63, 392.00, 493.88, 587.33] }, // Em
+          { bass: 220.00, chords: [440.00, 523.25, 659.25, 783.99] }  // Am
+        ];
+
+        const cur = progressions[this.chordStep % progressions.length];
+        this.playSoftChord(cur.bass, cur.chords);
+        this.chordStep++;
+
+        this.bgmTimer = setTimeout(() => {
+          this.loopMelody();
+        }, 3200);
+      }
+
+      playSoftChord(bassFreq, chordFreqs) {
+        if (!this.bgmPlaying || !this.ctx) return;
+        const now = this.ctx.currentTime;
+
+        // Warm bass tone
+        const bOsc = this.ctx.createOscillator();
+        const bGain = this.ctx.createGain();
+        bOsc.type = 'triangle';
+        bOsc.frequency.setValueAtTime(bassFreq, now);
+        bGain.gain.setValueAtTime(0, now);
+        bGain.gain.linearRampToValueAtTime(0.08, now + 0.5);
+        bGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.0);
+
+        bOsc.connect(bGain);
+        bGain.connect(this.masterGain);
+        bOsc.start(now);
+        bOsc.stop(now + 3.1);
+
+        // Gentle Rhodes / Music box chords
+        chordFreqs.forEach((freq, i) => {
+          setTimeout(() => {
+            if (!this.bgmPlaying || !this.ctx) return;
+            const t = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.05, t + 0.15);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 2.2);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(t);
+            osc.stop(t + 2.3);
+          }, i * 160);
+        });
+      }
+    }
+
+    const sound = new RomanticSoundEngine();
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════════
+     * FALLING PETALS & STARDUST CANVAS (HTML5 Particle System)
+     * ═══════════════════════════════════════════════════════════════════════
+     */
+    class AmbientParticles {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.petals = [];
+        this.sparks = [];
+        this.fireflies = [];
+        this.maxPetals = 28;
+        this.maxFireflies = 18;
+        this.width = 0;
+        this.height = 0;
+        this.init();
+      }
+
+      init() {
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+
+        for (let i = 0; i < this.maxPetals; i++) {
+          this.petals.push(this.createPetal(true));
+        }
+
+        for (let i = 0; i < this.maxFireflies; i++) {
+          this.fireflies.push(this.createFirefly(true));
+        }
+
+        window.addEventListener('pointermove', (e) => this.addSparks(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) {
+            this.addSparks(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        });
+
+        this.animate();
+      }
+
+      resize() {
+        this.width = this.canvas.width = window.innerWidth;
+        this.height = this.canvas.height = window.innerHeight;
+      }
+
+      createPetal(randomY = false) {
+        const colors = ['#F8B4C0', '#EAA4B2', '#C97B84', '#FFFDF9', '#E8DDD0'];
+        return {
+          x: Math.random() * this.width,
+          y: randomY ? Math.random() * this.height : -20,
+          size: 7 + Math.random() * 8,
+          speedX: -0.5 + Math.random() * 1.5,
+          speedY: 1.0 + Math.random() * 1.2,
+          rotation: Math.random() * 360,
+          rotationSpeed: -1 + Math.random() * 2,
+          flip: Math.random() * Math.PI,
+          flipSpeed: 0.02 + Math.random() * 0.03,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          opacity: 0.35 + Math.random() * 0.45
+        };
+      }
+
+      createFirefly(randomY = false) {
+        return {
+          x: Math.random() * this.width,
+          y: randomY ? Math.random() * this.height : this.height + 10,
+          radius: 1 + Math.random() * 2,
+          speedX: -0.3 + Math.random() * 0.6,
+          speedY: -0.4 - Math.random() * 0.6,
+          alpha: 0.2 + Math.random() * 0.6,
+          pulseSpeed: 0.02 + Math.random() * 0.03,
+          phase: Math.random() * Math.PI * 2
+        };
+      }
+
+      addSparks(x, y) {
+        if (Math.random() > 0.4) return;
+        this.sparks.push({
+          x: x + (-8 + Math.random() * 16),
+          y: y + (-8 + Math.random() * 16),
+          size: 2 + Math.random() * 3,
+          life: 1.0,
+          decay: 0.035 + Math.random() * 0.03,
+          speedX: -0.5 + Math.random() * 1,
+          speedY: -0.5 - Math.random() * 1.2
+        });
+      }
+
+      burstCelebration(centerX, centerY) {
+        for (let i = 0; i < 60; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 2.5 + Math.random() * 6.5;
+          this.sparks.push({
+            x: centerX,
+            y: centerY,
+            size: 3 + Math.random() * 4,
+            life: 1.0,
+            decay: 0.012 + Math.random() * 0.015,
+            speedX: Math.cos(angle) * speed,
+            speedY: Math.sin(angle) * speed - 2.5,
+            isHeart: Math.random() > 0.5
+          });
+        }
+      }
+
+      animate() {
+        this.ctx.clearRect(0, 0, this.width, this.height);
+
+        // Draw fireflies
+        this.fireflies.forEach((f) => {
+          f.x += f.speedX;
+          f.y += f.speedY;
+          f.phase += f.pulseSpeed;
+          const currentAlpha = Math.max(0.1, f.alpha + Math.sin(f.phase) * 0.3);
+
+          if (f.y < -10 || f.x < -10 || f.x > this.width + 10) {
+            Object.assign(f, this.createFirefly(false));
+          }
+
+          this.ctx.beginPath();
+          this.ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+          this.ctx.fillStyle = `rgba(242, 199, 121, ${currentAlpha})`;
+          this.ctx.shadowColor = '#F2C779';
+          this.ctx.shadowBlur = 8;
+          this.ctx.fill();
+        });
+
+        this.ctx.shadowBlur = 0;
+
+        // Draw Petals
+        this.petals.forEach((p) => {
+          p.x += p.speedX;
+          p.y += p.speedY;
+          p.rotation += p.rotationSpeed;
+          p.flip += p.flipSpeed;
+
+          if (p.y > this.height + 20 || p.x < -30 || p.x > this.width + 30) {
+            Object.assign(p, this.createPetal(false));
+          }
+
+          this.ctx.save();
+          this.ctx.translate(p.x, p.y);
+          this.ctx.rotate((p.rotation * Math.PI) / 180);
+          this.ctx.scale(1, Math.cos(p.flip));
+
+          this.ctx.beginPath();
+          this.ctx.ellipse(0, 0, p.size, p.size * 0.58, 0, 0, Math.PI * 2);
+          this.ctx.fillStyle = p.color;
+          this.ctx.globalAlpha = p.opacity;
+          this.ctx.fill();
+          this.ctx.restore();
+        });
+
+        // Draw Cursor Sparks / Confetti
+        for (let i = this.sparks.length - 1; i >= 0; i--) {
+          const s = this.sparks[i];
+          s.x += s.speedX;
+          s.y += s.speedY;
+          s.life -= s.decay;
+
+          if (s.life <= 0) {
+            this.sparks.splice(i, 1);
+            continue;
+          }
+
+          this.ctx.save();
+          this.ctx.translate(s.x, s.y);
+          this.ctx.globalAlpha = s.life;
+
+          if (s.isHeart) {
+            this.ctx.fillStyle = '#C97B84';
+            this.ctx.font = `${s.size * 3}px serif`;
+            this.ctx.fillText('♥', 0, 0);
+          } else {
+            this.ctx.fillStyle = '#F2C779';
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, s.size, 0, Math.PI * 2);
+            this.ctx.fill();
+          }
+          this.ctx.restore();
+        }
+
+        requestAnimationFrame(() => this.animate());
+      }
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════════
+     * STATE MANAGEMENT
+     * ═══════════════════════════════════════════════════════════════════════
+     */
+    const state = {
+      bouquet: [], // Array of flower IDs
+      slotFlowerMap: {}, // slotIndex -> flowerId
+      activeModalFlower: null,
+      isTied: false,
+      isProcessing: false,
+      theme: 'garden'
+    };
+
+    // DOM Elements
+    const gardenGrid = document.getElementById('gardenGrid');
+    const statusCaption = document.getElementById('statusCaption');
+    const potActionBar = document.getElementById('potActionBar');
+    const potCountDisplay = document.getElementById('potCountDisplay');
+    const undoBtn = document.getElementById('undoBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const tieBouquetBtn = document.getElementById('tieBouquetBtn');
+    const finaleSection = document.getElementById('finaleSection');
+    const finaleLetterContent = document.getElementById('finaleLetterContent');
+    const vaseRibbon = document.getElementById('vaseRibbon');
+    const vaseWhisperTip = document.getElementById('vaseWhisperTip');
+    const musicToggleBtn = document.getElementById('musicToggleBtn');
+    const musicLabel = document.getElementById('musicLabel');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+    const copyLetterBtn = document.getElementById('copyLetterBtn');
+    const saveKeepsakeBtn = document.getElementById('saveKeepsakeBtn');
+    const rearrangeBtn = document.getElementById('rearrangeBtn');
+    const loveToast = document.getElementById('loveToast');
+
+    // Modals
+    const flowerModal = document.getElementById('flowerModal');
+    const modalCard = document.getElementById('modalCard');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+    const modalFlowerName = document.getElementById('modalFlowerName');
+    const modalFlowerMeaning = document.getElementById('modalFlowerMeaning');
+    const modalNoteText = document.getElementById('modalNoteText');
+    const modalFlowerPreview = document.getElementById('modalFlowerPreview');
+
+    const keepsakeModal = document.getElementById('keepsakeModal');
+    const keepsakeCloseBtn = document.getElementById('keepsakeCloseBtn');
+    const printPostcardBtn = document.getElementById('printPostcardBtn');
+    const keepsakeLetterText = document.getElementById('keepsakeLetterText');
+    const keepsakeBouquetSummary = document.getElementById('keepsakeBouquetSummary');
+
+    let particleEngine = null;
+    let previousActiveElement = null;
+
+    /**
+     * Initialize Application
+     */
+    function init() {
+      finaleLetterContent.textContent = CONFIG.finaleText;
+      keepsakeLetterText.textContent = CONFIG.finaleText;
+
+      const canvas = document.getElementById('ambientCanvas');
+      particleEngine = new AmbientParticles(canvas);
+
+      renderGardenGrid();
+      setupEventListeners();
+    }
+
+    /**
+     * Render Garden Buttons
+     */
+    function renderGardenGrid() {
+      gardenGrid.innerHTML = '';
+
+      CONFIG.flowers.forEach((flower) => {
+        const li = document.createElement('li');
+        li.className = 'garden-item';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'flower-btn';
+        btn.id = `flower-btn-${flower.id}`;
+        btn.setAttribute('data-id', flower.id);
+        btn.setAttribute('aria-label', `Add ${flower.name} (${flower.meaning})`);
+
+        btn.innerHTML = `
+          <div class="flower-icon-wrap" aria-hidden="true">
+            ${FLOWER_ICONS[flower.id] || ''}
+          </div>
+          <span class="flower-btn-label">${flower.name}</span>
+          <span class="flower-btn-meaning">${flower.meaning}</span>
+          <span class="flower-count-badge" id="badge-${flower.id}" aria-hidden="true">0</span>
+        `;
+
+        li.appendChild(btn);
+        gardenGrid.appendChild(li);
+      });
+    }
+
+    /**
+     * Setup Event Listeners
+     */
+    function setupEventListeners() {
+      // Garden Grid click delegation
+      gardenGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.flower-btn');
+        if (!btn || state.isProcessing) return;
+
+        const flowerId = btn.getAttribute('data-id');
+        openModal(flowerId);
+      });
+
+      // Modal Confirm Button
+      modalConfirmBtn.addEventListener('click', () => {
+        if (!state.activeModalFlower || state.isProcessing) return;
+        if (state.bouquet.length >= CONFIG.maxFlowers) return;
+        confirmPickFlower(state.activeModalFlower);
+      });
+
+      // Modal Close Button
+      modalCloseBtn.addEventListener('click', closeModal);
+      modalCard.addEventListener('click', (e) => e.stopPropagation());
+      flowerModal.addEventListener('click', (e) => {
+        if (e.target === flowerModal) closeModal();
+      });
+
+      // Keepsake Modal Close
+      keepsakeCloseBtn.addEventListener('click', closeKeepsakeModal);
+      keepsakeModal.addEventListener('click', (e) => {
+        if (e.target === keepsakeModal) closeKeepsakeModal();
+      });
+
+      // Print Postcard
+      printPostcardBtn.addEventListener('click', () => {
+        window.print();
+      });
+
+      // Audio Toggle
+      musicToggleBtn.addEventListener('click', () => {
+        sound.toggleMelody((isPlaying) => {
+          if (isPlaying) {
+            musicToggleBtn.classList.add('playing');
+            musicLabel.textContent = 'Melody: Playing';
+            showToast('🎵 Ambient romantic melody playing');
+          } else {
+            musicToggleBtn.classList.remove('playing');
+            musicLabel.textContent = 'Melody: Off';
+          }
+        });
+      });
+
+      // Candlelight Theme Switch
+      themeToggleBtn.addEventListener('click', () => {
+        if (state.theme === 'garden') {
+          state.theme = 'candlelight';
+          document.documentElement.setAttribute('data-theme', 'candlelight');
+          themeIcon.textContent = '☀️';
+          themeLabel.textContent = 'Garden Sun';
+          showToast('🕯️ Candlelit Evening Mode');
+        } else {
+          state.theme = 'garden';
+          document.documentElement.removeAttribute('data-theme');
+          themeIcon.textContent = '🕯️';
+          themeLabel.textContent = 'Candlelight';
+          showToast('☀️ Garden Sun Mode');
+        }
+      });
+
+      // Undo button
+      undoBtn.addEventListener('click', handleUndoLastFlower);
+
+      // Clear / Start over button
+      clearBtn.addEventListener('click', handleClearAllFlowers);
+
+      // Tie Bouquet CTA Click
+      tieBouquetBtn.addEventListener('click', handleTieBouquet);
+
+      // Letter Actions
+      copyLetterBtn.addEventListener('click', copyLetterToClipboard);
+      saveKeepsakeBtn.addEventListener('click', openKeepsakeModal);
+      rearrangeBtn.addEventListener('click', () => {
+        window.scrollTo({ top: gardenGrid.offsetTop - 80, behavior: 'smooth' });
+      });
+
+      // Interactive Flower Hover in Vase
+      const bouquetGroup = document.getElementById('bouquetFlowersGroup');
+      bouquetGroup.addEventListener('click', handleVaseSlotInspect);
+      bouquetGroup.addEventListener('pointerenter', handleVaseSlotInspect, true);
+
+      // Global Keydown
+      document.addEventListener('keydown', handleGlobalKeydown);
+    }
+
+    /**
+     * Inspect individual flowers in the vase
+     */
+    function handleVaseSlotInspect(e) {
+      const slot = e.target.closest('.bouquet-flower-slot');
+      if (!slot) return;
+
+      const slotIdx = slot.getAttribute('data-slot');
+      const flowerId = state.slotFlowerMap[slotIdx];
+      if (!flowerId) return;
+
+      const flower = CONFIG.flowers.find(f => f.id === flowerId);
+      if (flower) {
+        sound.playChime(659.25);
+        vaseWhisperTip.textContent = `🌸 ${flower.name}: “${flower.note}”`;
+        vaseWhisperTip.classList.add('is-active');
+      }
+    }
+
+    /**
+     * Toast Alert
+     */
+    function showToast(message) {
+      loveToast.textContent = message;
+      loveToast.classList.add('show');
+      setTimeout(() => {
+        loveToast.classList.remove('show');
+      }, 2600);
+    }
+
+    /**
+     * Copy Letter to Clipboard
+     */
+    function copyLetterToClipboard() {
+      const letterText = `${CONFIG.finaleText}\n\n— Forever yours, Moiz ♥ (For Manahil Jiii)`;
+      navigator.clipboard.writeText(letterText).then(() => {
+        showToast('💌 Letter copied with love for Manahil Jiii! ❤️');
+      }).catch(() => {
+        showToast('💌 Letter ready with love!');
+      });
+    }
+
+    /**
+     * Open Keepsake Modal
+     */
+    function openKeepsakeModal() {
+      const names = state.bouquet.map(id => {
+        const f = CONFIG.flowers.find(item => item.id === id);
+        return f ? f.name : '';
+      }).filter(Boolean);
+
+      keepsakeBouquetSummary.textContent = `Bouquet of 6 blooms: ${names.join(' • ')}`;
+      keepsakeModal.classList.add('is-open');
+      keepsakeModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeKeepsakeModal() {
+      keepsakeModal.classList.remove('is-open');
+      keepsakeModal.setAttribute('aria-hidden', 'true');
+    }
+
+    /**
+     * Lock/Unlock Body Scroll
+     */
+    function lockBodyScroll(lock) {
+      if (lock) {
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        if (scrollbarWidth > 0) {
+          document.body.style.paddingRight = `${scrollbarWidth}px`;
+        }
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
+    }
+
+    /**
+     * Open Modal for a selected flower
+     */
+    function openModal(flowerId) {
+      const flower = CONFIG.flowers.find(f => f.id === flowerId);
+      if (!flower) return;
+
+      sound.playChime(440);
+
+      previousActiveElement = document.activeElement;
+      state.activeModalFlower = flower;
+
+      modalFlowerName.textContent = flower.name;
+      modalFlowerMeaning.textContent = `✦ Meaning: ${flower.meaning} ✦`;
+      modalNoteText.textContent = `“${flower.note}”`;
+      modalFlowerPreview.innerHTML = FLOWER_ICONS[flower.id] || '';
+
+      const isFull = state.bouquet.length >= CONFIG.maxFlowers;
+      if (isFull) {
+        modalConfirmBtn.textContent = `Vase is Full (${CONFIG.maxFlowers}/${CONFIG.maxFlowers})`;
+        modalConfirmBtn.setAttribute('disabled', 'true');
+      } else {
+        modalConfirmBtn.textContent = 'Add it to the Bouquet';
+        modalConfirmBtn.removeAttribute('disabled');
+      }
+
+      lockBodyScroll(true);
+      flowerModal.classList.add('is-open');
+      flowerModal.setAttribute('aria-hidden', 'false');
+
+      setTimeout(() => {
+        if (!isFull) {
+          modalConfirmBtn.focus();
+        } else {
+          modalCloseBtn.focus();
+        }
+      }, 50);
+    }
+
+    /**
+     * Close Modal
+     */
+    function closeModal() {
+      if (!flowerModal.classList.contains('is-open')) return;
+
+      flowerModal.classList.remove('is-open');
+      flowerModal.setAttribute('aria-hidden', 'true');
+      state.activeModalFlower = null;
+
+      lockBodyScroll(false);
+
+      if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+        previousActiveElement.focus();
+      }
+    }
+
+    /**
+     * Confirm adding a flower to the bouquet
+     */
+    function confirmPickFlower(flower) {
+      if (state.bouquet.length >= CONFIG.maxFlowers) return;
+      state.isProcessing = true;
+
+      const flowerId = flower.id;
+      const pickIndex = state.bouquet.length;
+      const slotIndex = SLOT_FILL_ORDER[pickIndex];
+
+      state.bouquet.push(flowerId);
+      state.slotFlowerMap[slotIndex] = flowerId;
+
+      sound.playFlowerPlaced(pickIndex);
+      closeModal();
+
+      // Render flower into slot
+      renderFlowerInSlot(slotIndex, flowerId);
+
+      // Animate slot into bouquet
+      const slotEl = document.getElementById(`bouquet-slot-${slotIndex}`);
+      if (slotEl) {
+        requestAnimationFrame(() => {
+          slotEl.classList.add('in-bouquet');
+        });
+      }
+
+      // Sparkle burst at vase
+      if (particleEngine) {
+        particleEngine.addSparks(window.innerWidth / 2, window.innerHeight * 0.45);
+      }
+
+      updateUIState();
+
+      setTimeout(() => {
+        state.isProcessing = false;
+      }, 350);
+    }
+
+    /**
+     * Render Flower into specific slot with appropriate stem geometry
+     */
+    function renderFlowerInSlot(slotIndex, flowerId) {
+      const slotEl = document.getElementById(`bouquet-slot-${slotIndex}`);
+      if (!slotEl) return;
+
+      const slot = SLOTS[slotIndex];
+      const [bx, by] = slot.base;
+      const [cx, cy] = slot.ctrl;
+      const [tx, ty] = slot.tip;
+      const headSvg = FLOWER_HEADS[flowerId] || '';
+
+      slotEl.innerHTML = `
+        <!-- Stem -->
+        <path d="M ${bx} ${by} Q ${cx} ${cy} ${tx} ${ty}" fill="none" stroke="#7C8A6E" stroke-width="4.5" stroke-linecap="round" />
+        <!-- Leaf -->
+        <path d="${slot.leaf}" fill="#7C8A6E" />
+        <!-- Flower Head -->
+        <g transform="translate(${tx}, ${ty}) rotate(${slot.angle})">
+          ${headSvg}
+        </g>
+      `;
+    }
+
+    /**
+     * Undo last flower added
+     */
+    function handleUndoLastFlower() {
+      if (state.bouquet.length === 0 || state.isProcessing) return;
+      state.isProcessing = true;
+
+      sound.playChime(349.23);
+
+      const lastIndex = state.bouquet.length - 1;
+      const slotIndex = SLOT_FILL_ORDER[lastIndex];
+      state.bouquet.pop();
+      delete state.slotFlowerMap[slotIndex];
+
+      const slotEl = document.getElementById(`bouquet-slot-${slotIndex}`);
+      if (slotEl) {
+        slotEl.classList.remove('in-bouquet');
+        setTimeout(() => {
+          if (!slotEl.classList.contains('in-bouquet')) {
+            slotEl.innerHTML = '';
+          }
+        }, 400);
+      }
+
+      if (state.isTied) {
+        state.isTied = false;
+        vaseRibbon.classList.remove('tied');
+        finaleSection.classList.remove('revealed');
+        tieBouquetBtn.classList.remove('is-completed');
+      }
+
+      updateUIState();
+
+      setTimeout(() => {
+        state.isProcessing = false;
+      }, 300);
+    }
+
+    /**
+     * Clear all flowers / Start over
+     */
+    function handleClearAllFlowers() {
+      if (state.bouquet.length === 0 || state.isProcessing) return;
+      state.isProcessing = true;
+
+      sound.playChime(261.63);
+
+      state.bouquet = [];
+      state.slotFlowerMap = {};
+
+      SLOTS.forEach((slot) => {
+        const slotEl = document.getElementById(`bouquet-slot-${slot.id}`);
+        if (slotEl) {
+          slotEl.classList.remove('in-bouquet');
+          setTimeout(() => {
+            slotEl.innerHTML = '';
+          }, 350);
+        }
+      });
+
+      if (state.isTied) {
+        state.isTied = false;
+        vaseRibbon.classList.remove('tied');
+        finaleSection.classList.remove('revealed');
+        tieBouquetBtn.classList.remove('is-completed');
+      }
+
+      vaseWhisperTip.classList.remove('is-active');
+      updateUIState();
+
+      setTimeout(() => {
+        state.isProcessing = false;
+      }, 350);
+    }
+
+    /**
+     * Update UI State (badges, button statuses, captions, CTA)
+     */
+    function updateUIState() {
+      const count = state.bouquet.length;
+
+      // Count occurrences of each flower
+      const flowerCounts = {};
+      CONFIG.flowers.forEach(f => { flowerCounts[f.id] = 0; });
+      state.bouquet.forEach(id => {
+        flowerCounts[id] = (flowerCounts[id] || 0) + 1;
+      });
+
+      // Update button badges
+      CONFIG.flowers.forEach(flower => {
+        const badge = document.getElementById(`badge-${flower.id}`);
+        const c = flowerCounts[flower.id];
+        if (badge) {
+          if (c > 0) {
+            badge.textContent = `×${c}`;
+            badge.classList.add('has-count');
+          } else {
+            badge.textContent = '0';
+            badge.classList.remove('has-count');
+          }
+        }
+
+        const btn = document.getElementById(`flower-btn-${flower.id}`);
+        if (btn) {
+          if (count >= CONFIG.maxFlowers) {
+            btn.classList.add('is-full-disabled');
+            btn.setAttribute('aria-label', `${flower.name} (Vase is full at 6 blooms)`);
+          } else {
+            btn.classList.remove('is-full-disabled');
+            btn.setAttribute('aria-label', `Add ${flower.name}`);
+          }
+        }
+      });
+
+      // Pot Action Bar
+      if (count > 0) {
+        potActionBar.style.opacity = '1';
+        potActionBar.style.pointerEvents = 'auto';
+        potCountDisplay.textContent = `${count} / ${CONFIG.maxFlowers} in vase`;
+        vaseWhisperTip.classList.add('is-active');
+      } else {
+        potActionBar.style.opacity = '0';
+        potActionBar.style.pointerEvents = 'none';
+        vaseWhisperTip.classList.remove('is-active');
+      }
+
+      updateStatusCaption(count);
+
+      // Tie bouquet CTA visibility
+      if (count >= CONFIG.minFlowersToTie && !state.isTied) {
+        tieBouquetBtn.classList.add('is-visible');
+      } else {
+        tieBouquetBtn.classList.remove('is-visible');
+      }
+    }
+
+    /**
+     * Dynamic caption based on count
+     */
+    function updateStatusCaption(count) {
+      let text = '';
+      if (count === 0) {
+        text = 'your bouquet starts empty — go on, pick a bloom for Manahil Jiii';
+      } else if (count === 1) {
+        text = 'a quiet beginning — your first bloom is tenderly in place';
+      } else if (count === 2) {
+        text = 'two blooms intertwined — gathering gentle warmth';
+      } else if (count === 3) {
+        text = 'three blooms gathered — ready whenever you wish to tie it';
+      } else if (count < CONFIG.maxFlowers) {
+        text = `${count} blooms blooming together in harmony`;
+      } else {
+        text = 'all six blooms united — a breathtaking garden for Manahil Jiii';
+      }
+
+      statusCaption.style.opacity = '0';
+      setTimeout(() => {
+        statusCaption.textContent = text;
+        statusCaption.style.opacity = '1';
+      }, 140);
+    }
+
+    /**
+     * Handle Tie the Bouquet CTA
+     */
+    function handleTieBouquet() {
+      if (state.isTied || state.bouquet.length < CONFIG.minFlowersToTie) return;
+      state.isTied = true;
+
+      // Romantic celebration harp glissando
+      sound.playTyingCelebration();
+
+      // Confetti / Petal burst from vase
+      if (particleEngine) {
+        const rect = vaseRibbon.getBoundingClientRect();
+        particleEngine.burstCelebration(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      }
+
+      // Tie ribbon on vase
+      if (vaseRibbon) {
+        vaseRibbon.classList.add('tied');
+      }
+
+      // Hide CTA button
+      tieBouquetBtn.classList.remove('is-visible');
+      tieBouquetBtn.classList.add('is-completed');
+      tieBouquetBtn.setAttribute('disabled', 'true');
+
+      // Reveal Finale Section
+      finaleSection.classList.add('revealed');
+
+      statusCaption.style.opacity = '0';
+      setTimeout(() => {
+        statusCaption.textContent = 'your bouquet is tied with eternal love for Manahil Jiii';
+        statusCaption.style.opacity = '1';
+      }, 180);
+
+      // Smooth scroll down to letter
+      setTimeout(() => {
+        finaleSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 350);
+    }
+
+    /**
+     * Keyboard Navigation & Focus Trap Handling
+     */
+    function handleGlobalKeydown(e) {
+      if (e.key === 'Escape') {
+        if (flowerModal.classList.contains('is-open')) closeModal();
+        if (keepsakeModal.classList.contains('is-open')) closeKeepsakeModal();
+        return;
+      }
+
+      if (flowerModal.classList.contains('is-open') && e.key === 'Tab') {
+        const focusableElements = Array.from(modalCard.querySelectorAll('button:not([disabled])'));
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    }
+
+    // Initialize on DOM ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
